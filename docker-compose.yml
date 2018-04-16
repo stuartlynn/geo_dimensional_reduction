@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  frontend:
+    build: ./frontend
+    command: yarn start
+    ports:
+      - 3002:3000
+    volumes:
+      - ./frontend:/app/
+    depends_on:
+      - backend
+  backend:
+    build: ./backend/
+    environment:
+      - FLASK_APP=/app/app.py
+      - FLASK_DEBUG=1
+      - LC_ALL=C.UTF-8
+      - LANG=C.UTF-8
+    command:  bash -c "cp /bhtsne/bhtsne/bhtsne.py ./
+              && cp /bhtsne/bhtsne/bh_tsne ./
+              && flask run --host 0.0.0.0"
+    ports:
+      - 5000:5000
+    volumes:
+      - ./backend:/app/
