@@ -1,7 +1,8 @@
 import React from "react";
-import mapboxgl from '@carto/mapbox-gl'
-import mapboxcss from '@carto/mapbox-gl/dist/mapbox-gl.css'
+//import mapboxgl from '@carto/mapbox-gl'
+//import mapboxcss from '@carto/mapbox-gl/dist/mapbox-gl.css'
 
+const mapboxgl = window.mapboxgl
 
 class Map extends React.Component{
 
@@ -17,6 +18,7 @@ class Map extends React.Component{
       </div>
     )
   }
+
   shouldComponentUpdate(){
     return true;
   }
@@ -42,10 +44,7 @@ class Map extends React.Component{
           style: this.props.basemap,
           center: [-73.9449975,40.645244],
           zoom: 11.5,
-          pitch: 0,
-          bearing: 8
       });
-
       window.map = map
       this.setState({
         map: map
@@ -58,7 +57,7 @@ class Map extends React.Component{
   }
 
   renderChildren() {
-    if(this.state && this.state.map && this.props.children){
+    if(this.state && this.state.map){
       return React.Children.map(this.props.children, child => {
         return React.cloneElement(child, {
           map: this.state.map

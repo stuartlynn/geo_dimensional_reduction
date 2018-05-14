@@ -7,7 +7,6 @@ export const UPDATE_PASSWORD  = 'map/PASSWORD'
 export const ATTEMPTING_LOGIN = 'map/ATTEMPTING_LOGIN'
 export const LOGIN_FAILED     = 'map/LOGIN_FAILED'
 export const LOGIN_SUCCEEDED  = 'map/LOGIN_SUCCEEDED'
-
 export const MAP_MOVED        = 'map/MAP_MOVED'
 
 const initialState = {

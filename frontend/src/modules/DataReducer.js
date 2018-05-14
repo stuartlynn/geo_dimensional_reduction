@@ -1,3 +1,5 @@
+import uuidv1 from 'uuid/v1'
+
 export const UPDATEQUERY  = 'map/UPDATE_QUERY'
 export const UPDATESTYLE  = 'map/UPDATE_STYLE'
 export const GOT_RESULTS_FOR_METHOD = 'data/GOT_RESULTS_FOR_METHOD'
@@ -31,7 +33,10 @@ const initalState= {
   ],
   username: 'observatory',
   apiKey: '893a45cc8505dfffe26d94b3c160a6fc1b1da459',
-  selection : []
+  //selection : null,
+  selection: null, //{ loc: { x: 10, y:10}, radius:10},
+  joinTable:{},
+  method:'PCA'
 	//username: 'stuartlynn',
 	//apiKey: 'cbbc4efb5201efb60996d645f264ef4e7b14495b'
 }
@@ -42,7 +47,8 @@ export default (state=initalState, action)=>{
       return {
         ...state,
         results: {...state.results, ...{[action.method] : action.data}},
-        dataStatus: {...state.dataStatus, ...{[action.method] : 'loaded'}}
+        dataStatus: {...state.dataStatus, ...{[action.method] : 'loaded'}},
+        joinTable: {...state.joinTable , ...{[action.method]:action.target_table}}
       }
       break;
     case SET_SELECTION:
@@ -61,18 +67,20 @@ export default (state=initalState, action)=>{
 
 }
 
-const getDataURL = (query, method, username, apiKey, host)=>{
+const getDataURL = (query, method, target_table, username, apiKey, host)=>{
   const params = {
     'query': query ,
     'api_key': apiKey,
     'user': username,
-    'format': 'json'
+    'format': 'json',
+    'target_table':target_table
   }
   const components = Object.keys(params).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join('&');
   return `${host}/${method}?${components}`
 }
 
 export const setSelection = (selection)=>{
+  console.log(selection)
   return (dispatch) => {
     dispatch({
       type: SET_SELECTION,
@@ -80,7 +88,11 @@ export const setSelection = (selection)=>{
     })
   }
 }
-export const getDimReductions = (method)=>{
+
+export const getDimReductions = (method,target_table)=>{
+  if(target_table === undefined){
+    target_table  = 'PCA_' +  uuidv1().replace(/\-/g,'_')
+  }
   return (dispatch,getState)=>{
     const { server,query } = getState().data
     const { username, apiKey } = getState().data
@@ -89,14 +101,15 @@ export const getDimReductions = (method)=>{
       type: REQUESTED_RESULTS_FOR_METHOD,
       method : method
     })
-    const url = getDataURL(query,method,username,apiKey,server)
+    const url = getDataURL(query,method,target_table,username,apiKey,server)
     fetch( url ).then(r =>r.json()).then(data=>{
 
       console.log(data)
       dispatch({
         type: GOT_RESULTS_FOR_METHOD,
         data : data,
-        method: method
+        method: method,
+        target_table: target_table
       })
     })
   }
