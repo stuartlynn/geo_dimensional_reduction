@@ -7,6 +7,7 @@ class Viewer extends React.Component{
 
   constructor(props){
     super(props)
+    this.dispatchable = true
     this.state={
       width: 500,
       height:500
@@ -64,14 +65,15 @@ class Viewer extends React.Component{
     const colMax = d3.max(data,(d)=>+d[this.props.variable])
 
 		this.colScale  = d3.scaleLinear()
-											  .domain( data.map((p) => p[this.props.variable]))
-												.range([         "#f7feae",
+			.domain( data.map((p) => p[this.props.variable]))
+      .range([
+            "#f7feae",
             "#b7e6a5",
             "#7ccba2",
             "#46aea0",
             "#089099",
             "#00718b",
-"#045275"])
+            "#045275"])
 	}
 
 	setUpData(data){
@@ -103,7 +105,7 @@ class Viewer extends React.Component{
 						if(mouseLoc){
 							if( Math.pow(point.x - mouseLoc.x,2) + Math.pow(point.y -mouseLoc.y,2) < r*r){
 									ctx.globalAlpha = 1.0;
-									selectedPointIDS.push(point.cartodb_id)
+									selectedPointIDS.push(point.id)
 							}
 						}
 						ctx.fillStyle = point.color;
@@ -111,10 +113,19 @@ class Viewer extends React.Component{
 			}
 			ctx.globalAlpha=1.0;
 			ctx.restore()
+
+      if(mouseLoc && this.props.onSelection){
+        if(this.dispatchable){
+          const dataLoc  = {
+            x: this.xScale.invert(mouseLoc.x),
+            y: this.yScale.invert(mouseLoc.y)
+          }
+          this.props.onSelection({loc:dataLoc, radius: this.xScale.invert(r)})
+          this.dispatchable=false
+          setTimeout(()=> this.dispatchable = true , 500)
+        }
+      }
 		})
-    if(mouseLoc && this.props.onSelection){
-      this.props.onSelection(selectedPointIDS)
-    }
   }
 
 	mouseMoved(e){
