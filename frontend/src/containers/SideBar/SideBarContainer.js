@@ -3,8 +3,7 @@ import SideBar from "./SideBar"
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { closeDrawer } from '../../modules/TopBarReducer.js'
-import { updateUsername, updatePassword } from '../../modules/MapReducer.js'
-import { updateStyle, updateQuery } from '../../modules/MapReducer.js'
+import { updateUsername, updatePassword, updateQuery } from '../../modules/DataReducer.js'
 
 
 class SideBarContainer extends React.Component{
@@ -14,12 +13,10 @@ class SideBarContainer extends React.Component{
     return(
       < SideBar open={this.props.open}
                 updateQuery={ this.props.updateQuery}
-                updateStyleString={ this.props.updateStyle}
                 onUsernameChange= {this.props.updateUsername}
                 onAPIKeyChange= {this.props.updatePassword}
                 onCloseDrawer= {this.props.closeDrawer}
                 query = {this.props.query}
-                mapStyle = {this.props.mapStyle}
                 onUsernameChange = {(e,val) => this.props.updateUsername(val)}
                 onAPIKeyChange = {(e,val) => this.props.updatePassword(val)}
                 username={this.props.username}
@@ -34,7 +31,6 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   closeDrawer,
   updateUsername,
   updatePassword,
-  updateStyle,
   updateQuery
 }, dispatch)
 
@@ -42,10 +38,9 @@ const mapDispatchToProps = dispatch => bindActionCreators({
 
 const mapStateToProps = state => ({
   open : state.topbar.showDrawer,
-  query: state.map.query,
-  mapStyle: state.map.style,
-  username: state.map.username,
-  password: state.map.password
+  query: state.data.query,
+  username: state.data.username,
+  password: state.data.apiKey
 })
 
 

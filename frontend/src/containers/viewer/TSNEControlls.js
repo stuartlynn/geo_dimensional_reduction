@@ -9,31 +9,48 @@ class TSNEControlls extends Component {
     className: PropTypes.string,
     dispatch: PropTypes.func.isRequired
   };
-
+  state={
+    iterations: 2000,
+    perplexity: 35,
+    learning_rate: 200
+  }
   render() {
     console.log('PROPS ARE ', this.props)
     return (
       <div class='controls'>
-        <Text className='label' weight="medium">No Components</Text>
+        <Text className='label' weight="medium">Iterations</Text>
         <Range className='input'
-               name='noComponents'
+               name='iterations'
+               value={this.state.iterations}
+               maxValue={1000}
+               minValue={10}
+               onChange={(val)=>this.setState({iterations: val})}
                />
+
+        <Text className='label' weight="medium">Perplexity</Text>
+        <Range className='input'
+               name='Perplexity'
+               value={this.state.perplexity}
+               maxValue={1000}
+               minValue={10}
+               onChange={(val)=>this.setState({perplexity: val})}
+               />
+
+        <Text className='label' weight="medium">Learning Rate</Text>
+        <Range className='input'
+               name='Learning Rate'
+               value={this.state.learning_rate}
+               maxValue={1000}
+               minValue={10}
+               onChange={(val)=>this.setState({learning_rate: val})}
+               />
+
        <Button
-         onClick={this.props.onRun}
+         onClick={()=>this.props.onRun(this.state)}
          className='run'
          large>
          RUN
        </Button>
-       { this.props.dataLoaded &&
-					<Dropdown as='div' action='click'>
-						<Dropdown.Trigger> <Button>Click me</Button></Dropdown.Trigger>
-						<Dropdown.Content>
-							<Dropdown.Menu>
-								{ this.props.columns.map((col)=> <Dropdown.Item key={col}>{col}</Dropdown.Item>)}
-							</Dropdown.Menu>
-						</Dropdown.Content>
-					</Dropdown>
-       }
       </div>
     );
   }

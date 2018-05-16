@@ -24,16 +24,6 @@ class PCAControlls extends Component {
          large>
          RUN
        </Button>
-       { this.props.dataLoaded &&
-					<Dropdown as='div' action='click'>
-						<Dropdown.Trigger> <Button>Click me</Button></Dropdown.Trigger>
-						<Dropdown.Content>
-							<Dropdown.Menu>
-								{ this.props.columns.map((col)=> <Dropdown.Item key={col}>{col}</Dropdown.Item>)}
-							</Dropdown.Menu>
-						</Dropdown.Content>
-					</Dropdown>
-       }
       </div>
     );
   }

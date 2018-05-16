@@ -37,7 +37,8 @@ class Viewer extends React.Component{
 			this.draw(this.points)
 		}
 		if(nextProps.variable !== this.props.variable){
-			this.setUpColorScale(this.props.data,nextProps.variable)
+			this.setUpColScale(this.props.data,nextProps.variable)
+      this.setUpData(this.props.data)
 			this.draw(this.points)
 		}
 	}
@@ -88,24 +89,24 @@ class Viewer extends React.Component{
     })
 	}
 
-  draw(data,mouseLoc, pointWidth=1, pointHeight=1){
+  draw(data,mouseLoc, pointWidth=3, pointHeight=1){
 		window.requestAnimationFrame(()=>{
 			const ctx = this.refs.canvas.getContext('2d');
 			ctx.clearRect(0, 0, this.state.width, this.state.height);
 			ctx.fillStyle = this.props.background ? this.props.background : 'white'
 			ctx.fillRect(0,0, this.state.width, this.state.height);
 			data.sort((a,b)=> a.val - b.val)
-			let selectedPointIDS= []
+			let selectedPoints= []
 			const r= 20
 			for (let i = 0; i < data.length; ++i) {
 						const point = data[i];
 						if(mouseLoc){
-							ctx.globalAlpha=0.02;
+							ctx.globalAlpha=0.2;
 						}
 						if(mouseLoc){
 							if( Math.pow(point.x - mouseLoc.x,2) + Math.pow(point.y -mouseLoc.y,2) < r*r){
 									ctx.globalAlpha = 1.0;
-									selectedPointIDS.push(point.id)
+									selectedPoints.push(this.props.data[i])
 							}
 						}
 						ctx.fillStyle = point.color;
@@ -120,7 +121,21 @@ class Viewer extends React.Component{
             x: this.xScale.invert(mouseLoc.x),
             y: this.yScale.invert(mouseLoc.y)
           }
-          this.props.onSelection({loc:dataLoc, radius: this.xScale.invert(r)})
+
+
+          let ok = true
+          const rScaled = this.xScale.invert(r)
+          selectedPoints.forEach((p)=>{
+            const within = (p.x-dataLoc.x)*(p.x-dataLoc.x) + (p.y-dataLoc.y)*(p.y-dataLoc.y) < rScaled*rScaled
+            if(within===false){
+              ok=false
+            }
+          })
+
+          if(ok===false){
+            alert("ISSUE WITH THE SCALING")
+          }
+          this.props.onSelection({loc:dataLoc, radius: rScaled, points: selectedPoints})
           this.dispatchable=false
           setTimeout(()=> this.dispatchable = true , 500)
         }
@@ -143,7 +158,10 @@ class Viewer extends React.Component{
 					height={this.state.height}
 					ref='canvas'
 					onMouseMove={this.mouseMoved.bind(this)}
-					onMouseOut={()=> this.draw(this.points)} />
+          onMouseOut={()=> {
+            this.draw(this.points)
+            // this.props.onSelection(null)
+          }} />
         <div ref='tooltip'/>
       </div>
     )

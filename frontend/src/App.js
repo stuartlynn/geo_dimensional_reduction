@@ -12,6 +12,7 @@ import ToolBarContainer from './containers/topBar/TopBarContainer.js'
 import SideBarContainer from './containers/SideBar/SideBarContainer.js'
 import MapContainer from './containers/map/MapContainer.js'
 import ViewerContainer from './containers/viewer/ViewerContainer.js'
+import StatsBar from './containers/StatsBar/StatsBar.js'
 
 import { PersistGate } from 'redux-persist/integration/react'
 
@@ -37,11 +38,12 @@ class App extends Component {
         <PersistGate loading={null} persistor={persistor}>
           <MuiThemeProvider muiTheme={muiTheme}>
             <div className="App">
-                <ToolBarContainer />
+              <ToolBarContainer />
+              <StatsBar />
                 <SideBarContainer />
                 <MapContainer  className="Map" / >
                 <div className="tsneContainer">
-                  <ViewerContainer style={{width:"50%", height:"100%"}}  />
+                  <ViewerContainer style={{width:"30%", height:"100%"}}  />
                 </div>
             </div>
           </MuiThemeProvider>

@@ -24,13 +24,19 @@ def console_print(message):
 
 def calcPCA(data):
     pca = PCA(n_components=2)
-    result = pca.fit_transform(data)
+    normed_data = normalizeData(data)
+    result = pca.fit_transform(normed_data)
     return data.assign(x=result[:,0], y= result[:,1])
 
 
-def calcTSNEMulti(data):
-    tsne = TSNE(n_jobs=4)
-    Y = tsne.fit_transform(data)
+def calcTSNEMulti(data,iterations,perplexity,learning_rate):
+    tsne = TSNE(n_jobs=4,
+                perplexity=perplexity,
+                n_iter=iterations,
+                learning_rate= learning_rate)
+
+    normed_data = normalizeData(data)
+    Y = tsne.fit_transform(normed_data)
     return data.assign(x= Y[:,0], y = Y[:,1])
 
 
@@ -104,10 +110,14 @@ def runTSNE():
     api_key = request.args.get('api_key')
     target_table  = request.args.get('target_table')
 
+    perplexity = int(request.args.get('perplexity'))
+    iterations = int(request.args.get('iterations'))
+    learning_rate= int(request.args.get('learning_rate'))
+
     cc = getCartoContext(user,api_key)
     data =getCartoData(cc,query)
-
-    result = calcTSNEMulti(data)
+    console_print('RUNNING WITH iterations: {} perplexity:{} learning_rate:{}'.format(iterations,perplexity,learning_rate))
+    result = calcTSNEMulti(data.drop('orig_id',axis=1),iterations,perplexity,learning_rate)
     result = result.assign(orig_id = data.orig_id)
     cc.write(result, target_table, overwrite=True, privacy='public')
 

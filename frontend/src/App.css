@@ -63,8 +63,20 @@ html, body{
 .tsneContainer{
   position:absolute;
   height: 100%;
-  width: 50%;
+  width: 30%;
   right:0px;
+  top:0px;
+  background-color:white;
+  z-index: 200;
+  box-sizing: border-box;
+  padding-top:90px;
+}
+
+.statsBar{
+  position:absolute;
+  height: 100%;
+  width: 20%;
+  left:0px;
   top:0px;
   background-color:white;
   z-index: 200;

@@ -5,13 +5,20 @@ export const UPDATESTYLE  = 'map/UPDATE_STYLE'
 export const GOT_RESULTS_FOR_METHOD = 'data/GOT_RESULTS_FOR_METHOD'
 export const REQUESTED_RESULTS_FOR_METHOD = 'data/REQUESTED_RESULTS_FOR_METHOD'
 export const SET_SELECTION = 'data/SET_SELECTION'
+export const SET_METHOD = 'data/SET_METHOD'
+export const UPDATE_QUERY = 'data/UPDATE_QUERY'
+export const UPDATE_USERNAME = 'data/UPDATE_USERNAME'
+export const UPDATE_PASSWORD = 'data/UPDATE_PASSWORD'
+export const SET_SELECTED_VARIABLE = 'data/SET_SELECTED_VARIABLE'
 
 const initalState= {
   query : `select cartodb_id, the_geom, the_geom_webmercator,
           asian_pop/total_pop as pc_asian,
           black_pop/total_pop as pc_black,
           white_pop/total_pop as pc_white,
+
           bachelors_degree/total_pop as pc_bachelors,
+          associates_degree/total_pop as pc_associates,
           median_income/ (select max(median_income) from dr_block_groups_demo) as median_income
           from dr_block_groups_demo_ny
   `,
@@ -24,11 +31,11 @@ const initalState= {
   //selectedVariable: 'make_british_sign_language_part_of_the_national_curriculum',
   selectedVariable: 'pc_white',
   avaliableVariables: [
-    'bachelors_pc',
-    'associates_pc',
-    'black_pc',
-    'white_pc',
-    'asian_pc',
+    'pc_bachelors',
+    'pc_associates',
+    'pc_black',
+    'pc_white',
+    'pc_asian',
     'median_income'
   ],
   username: 'observatory',
@@ -51,15 +58,30 @@ export default (state=initalState, action)=>{
         joinTable: {...state.joinTable , ...{[action.method]:action.target_table}}
       }
       break;
+    case SET_METHOD:
+      return{
+        ...state,
+        method: action.method
+      }
     case SET_SELECTION:
       return{
         ...state,
         selection: action.selection
       }
+    case SET_SELECTED_VARIABLE:
+      return{
+        ...state,
+       selectedVariable: action.variable
+      }
     case REQUESTED_RESULTS_FOR_METHOD:
       return{
         ...state,
         dataStatus: {...state.dataStatus, ...{[action.method]:'pending'}}
+      }
+    case UPDATE_QUERY:
+      return{
+        ...state,
+        query: action.query
       }
     default:
      return state
@@ -67,16 +89,52 @@ export default (state=initalState, action)=>{
 
 }
 
-const getDataURL = (query, method, target_table, username, apiKey, host)=>{
+const getDataURL = (query, method,methodParams, target_table, username, apiKey, host)=>{
   const params = {
     'query': query ,
     'api_key': apiKey,
     'user': username,
     'format': 'json',
-    'target_table':target_table
+    'target_table':target_table,
+    ...methodParams
   }
   const components = Object.keys(params).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`).join('&');
   return `${host}/${method}?${components}`
+}
+
+export const setSelectedVariable = (variable)=>{
+  return(dispatch)=>{
+    dispatch({
+      type: SET_SELECTED_VARIABLE,
+      variable: variable
+    })
+  }
+}
+export const updateQuery = (query)=>{
+  return (dispatch)=>{
+    dispatch({
+      type: UPDATE_QUERY,
+      query
+    })
+  }
+}
+
+export const updateUsername = (username)=>{
+  return (dispatch)=>{
+    dispatch({
+      type: UPDATE_USERNAME,
+      username
+    })
+  }
+}
+
+export const updatePassword = (apiKey)=>{
+  return (dispatch)=>{
+    dispatch({
+      type: UPDATE_PASSWORD,
+      apiKey
+     })
+  }
 }
 
 export const setSelection = (selection)=>{
@@ -89,9 +147,18 @@ export const setSelection = (selection)=>{
   }
 }
 
-export const getDimReductions = (method,target_table)=>{
+export const setMethod =(method)=>{
+  return (dispatch) =>{
+    dispatch({
+      type: SET_METHOD,
+      method
+    })
+  }
+}
+
+export const getDimReductions = (method,params,target_table)=>{
   if(target_table === undefined){
-    target_table  = 'PCA_' +  uuidv1().replace(/\-/g,'_')
+    target_table  = method+'_' +  uuidv1().replace(/\-/g,'_')
   }
   return (dispatch,getState)=>{
     const { server,query } = getState().data
@@ -101,7 +168,7 @@ export const getDimReductions = (method,target_table)=>{
       type: REQUESTED_RESULTS_FOR_METHOD,
       method : method
     })
-    const url = getDataURL(query,method,target_table,username,apiKey,server)
+    const url = getDataURL(query,method,params,target_table,username,apiKey,server)
     fetch( url ).then(r =>r.json()).then(data=>{
 
       console.log(data)

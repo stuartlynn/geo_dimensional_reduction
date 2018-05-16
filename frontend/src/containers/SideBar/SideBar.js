@@ -53,17 +53,6 @@ const SideBar = (props)=>{
         />
 
 
-        <AceEditor
-          mode="javascript"
-          theme="solarized_dark"
-          onChange={props.updateStyleString}
-          name="styleEditor"
-          value= {props.mapStyle}
-          style={{height:'39%', width:'100%'}}
-          editorProps={{$blockScrolling: true}}
-        />
-
-
 
         <RaisedButton label='submit'
                       onClick={props.updateDataset}

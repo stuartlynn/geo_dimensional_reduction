@@ -2,29 +2,21 @@ import React from "react";
 import Viewer from './Viewer.js'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
-import { Tabs, Loading,Dropdown } from  '@carto/airship';
+import { Tabs, Loading,Dropdown, Text } from  '@carto/airship';
 import  PCAControlls from './PCAControlls'
 import  TSNEControlls from './TSNEControlls'
-import { getDimReductions, setSelection } from '../../modules/DataReducer'
+import { getDimReductions, setSelection, setMethod } from '../../modules/DataReducer'
+import  SimpleVariableChart  from './simpleVariablePlot'
 
 class ViewerContainer extends React.Component{
   render(){
     return(
       <div>
-        <Dropdown as="div">
-          <Dropdown.Trigger>Menu</Dropdown.Trigger>
-          <Dropdown.Content>
-            <Dropdown.Menu>
-              <Dropdown.Item>All</Dropdown.Item>
-              <Dropdown.Item>None</Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown.Content>
-        </Dropdown>
-        <Tabs selected={'PCA'} onChange={(state) => console.log("TABS STATE",state)} >
+        <Tabs selected={'PCA'} onChange={(state) => this.props.setMethod(["PCA","TSNE","MDS"][state.selected])} >
           <Tabs.Panel label='PCA'>
 
             <PCAControlls
-              onRun={()=>{this.props.getDimReductions('PCA')}}
+              onRun={(params)=>{this.props.getDimReductions('PCA',params)}}
               dataLoaded={this.props.dataStatus.PCA ==='loaded'}
               columns = {this.props.avaliableVariables}
             />
@@ -47,11 +39,10 @@ class ViewerContainer extends React.Component{
                 style={{padding:'20px', boxSizing:'border-box'}}
               />
             }
-
           </Tabs.Panel>
           <Tabs.Panel label='TSNE'>
             <TSNEControlls
-              onRun={()=>{this.props.getDimReductions('TSNE')}}
+              onRun={(params)=>{this.props.getDimReductions('TSNE',params)}}
               dataLoaded={this.props.dataStatus.TSNE==='loaded'}
               columns = {this.props.avaliableVariables}
               perpexity={30.0}
@@ -59,7 +50,6 @@ class ViewerContainer extends React.Component{
               learningRate={100.0}
               nIter={1000}
               metric={'euclidean'}
-              onSelection = {this.props.setSelection}
             />
 
             { this.props.dataStatus.TSNE == 'pending' &&
@@ -71,23 +61,9 @@ class ViewerContainer extends React.Component{
                 className='tsne'
                 variable = {this.props.selectedVariable}
                 background= 'black'
+                onSelection = {this.props.setSelection}
               />
             }
-          </Tabs.Panel>
-          <Tabs.Panel label='MDS'>
-
-            <Viewer
-              data={this.props.results.PCA}
-              perpexity={30.0}
-              earlyExaggeration={4.0}
-              learningRate={100.0}
-              nIter={1000}
-              metric={'euclidean'}
-              className='tsne'
-              variable = {this.props.selectedVariable}
-              background= 'black'
-            />
-
           </Tabs.Panel>
         </Tabs>
       </div>
@@ -98,7 +74,8 @@ class ViewerContainer extends React.Component{
 const mapDispatchToProps = (dispatch)=>{
   return bindActionCreators({
     getDimReductions,
-    setSelection
+    setSelection,
+    setMethod
   },dispatch)
 }
 
@@ -107,7 +84,8 @@ const mapStateToProps = (state)=>{
     dataStatus : state.data.dataStatus,
     results: state.data.results,
     selectedVariable: state.data.selectedVariable,
-	  avaliableVariables: state.data.avaliableVariables
+	  avaliableVariables: state.data.avaliableVariables,
+    selection: (state.data.selection ? state.data.selection.points : [])
   }
 }
 
